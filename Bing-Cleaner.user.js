@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         必应净化
 // @namespace    https://bbs.tampermonkey.net.cn/
-// @version      1.6.0
+// @version      1.6.1
 // @description  移动端 bing 使用优化, 使用前请查阅代码注释
 // @author       月有阴晴圆缺
 // @run-at       document-start
@@ -9,6 +9,10 @@
 // @grant        none
 // @require      https://code.jquery.com/jquery-3.7.1.js
 // ==/UserScript==
+
+/*
+ * 1.6.1 - fix: 带特殊字符的搜索关键词
+ */
 
 /*
  * 本脚本需要搭配 ADBlock/ADGuard/... 配合使用
@@ -41,6 +45,13 @@
 ||r.bing.com^
 
 */
+
+/*
+ 真正的下一页:
+ Parent: <div role="navigation" class="b_mpref">
+
+ <a class="sb_fullnpl" title="下一页" href="/search?q=%22fwasshing%22&amp;FPIG=D7F01B2BA1FE4936ACC01F5BB466A7BD&amp;first=2&amp;FORM=PORE" h="ID=SERP,5230.1"><span><div class="b_nextText b_primtxt">下一页</div></span><span><div class="sb_pagIconN sb_pI_noRot " aria-hidden="true"><span class="sw_next" aria-hidden="true">下一页</span></div></span></a>
+ */
 
 ; (function () {
     for (let i = 0; i < 20; i++) {
@@ -90,6 +101,7 @@
     $(function () {
         if (document.body.childNodes.length < 5) location.reload()
         // 2025.3.28: bing已经不认塞班UA了 下一页依旧要自己补
+        // 2025.4.12: 关键词带 " 会有下一页
 
         const args = new URL(location.href).searchParams
 
@@ -104,13 +116,13 @@
         let clazz = 'b_searchBoxForm'
 
         if (first > 0) {
-            let syy = `https://www.bing.com/search?q=${args.get('q')}&first=${first - (ls * 2)}&FORM=PORE`
+            let syy = `https://www.bing.com/search?q=${encodeURIComponent(args.get('q'))}&first=${first - (ls * 2)}&FORM=PORE`
             $($.parseHTML(`<div role="presentation" class="b_algo _切页面" style="background: #FFFFFF; text-align:center;" data-href="${syy}">上一页</div>`)).appendTo($('#b_results'))
         }
 
         first = first == 0 ? ls : first + ls
 
-        let xyy = `https://www.bing.com/search?q=${args.get('q')}&first=${first}&FORM=PORE`
+        let xyy = `https://www.bing.com/search?q=${encodeURIComponent(args.get('q'))}&first=${first}&FORM=PORE`
 
         $($.parseHTML(`<div role="presentation" class="b_algo _切页面" style="background: #FFFFFF; text-align:center;" data-href="${xyy}">下一页</div>`)).appendTo($('#b_results'))
 

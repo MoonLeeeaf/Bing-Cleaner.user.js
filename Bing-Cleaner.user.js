@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         必应净化
 // @namespace    https://bbs.tampermonkey.net.cn/
-// @version      1.6.1
+// @version      1.6.2
 // @description  移动端 bing 使用优化, 使用前请查阅代码注释
 // @author       月有阴晴圆缺
 // @run-at       document-start
@@ -11,6 +11,7 @@
 // ==/UserScript==
 
 /*
+ * 2025.5.23 - 1.6.2 - fix: 图片加载
  * 1.6.1 - fix: 带特殊字符的搜索关键词
  */
 
@@ -160,4 +161,9 @@
     })
 
     fuck()
+
+    // 修复图片显示
+    $('[data-class=rms_img]').replaceWith(function() {
+        return `<img src="${ $(this).attr("data-src") }"></img>`
+    })
 })()
